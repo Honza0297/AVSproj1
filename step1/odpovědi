@@ -1,0 +1,10 @@
+1) Jaké je maximální dosažitelné zrychlení celého běhu kodéru, jestli se soustředíme naoptimalizaci nejzásadnějších konvolučních funkcí (v Bottom-upzobrazení by se mělojednat o 7 vrchních záznamů)? Výpočet lze v realizovat dle Amdahlova zákona.
+	Odpověď:
+
+2) Jaké je dle vás realisticky dosažitelné zrychlení (nebude přihlíženo na kvalitu vašehoodhadu)?
+	odpověď: 3-5x
+
+3) Ze získaných optimalizačních reportů vypište nejméně 3 příčiny, které brání kompi-látoru kód vektorizovat. Nemusíte se omezovat na konkrétní funkce.
+	1)
+	2)
+	3) 
