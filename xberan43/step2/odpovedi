@@ -1,0 +1,8 @@
+1) Proc kompilatoru vadi prekryti prekryti filtru a ciloveho pole?
+    Odpoved: Obecne se problemu rika pointer-aliasing - problem by nastaval v situaci,     kdy by napriklad filtr a cilove pole ukazovaly na stejne misto a v cyklu by se vyskytoval radek typu  cil[x] += filtr[x-1] (obecne cteni a zapis na stejne misto v pameti), by dhocazelo k situaci, ze v jednom vypocetnim vektoru by byly potreba data, ktera jeste nejsou k dispozici. 
+
+2) Co zhorsuje vektorizaci horz. konvoluce ve smeru x a y?
+    Odpoved: Ve smeru osy x je problem nelinearniho indexovani pole src, ve smeru osy y je problem, ze cyklus obsahuje krome vnoreneho cyklu pres x i dalsi kod (jinak by sly smycky kolabovat).
+
+3) Ktery smer konvoluce se vam povedlo urychlit vice (horizontalni/vertikalni)? Cim se lisi?
+	Odpoved: Dle optreportu se vice zrychlila vertikalni konvoluce. Od horizontalni se lisi mj. jednickovym posunem v polich src a dst. 

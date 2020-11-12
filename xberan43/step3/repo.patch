@@ -1,0 +1,109 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 27b7719..2499d09 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -174,8 +174,8 @@ include_directories(${AOM_ROOT} ${AOM_CONFIG_DIR} ${AOM_ROOT}/apps
+                     ${AOM_ROOT}/common ${AOM_ROOT}/examples ${AOM_ROOT}/stats)
+ 
+ # Targets
+-set_source_files_properties(av1/common/convolve.c PROPERTIES COMPILE_FLAGS "-qopt-report=4 -qoptreport-phase=vec,loop, -qopenmp-simd")
+-set_source_files_properties(aom_dsp/aom_convolve.c PROPERTIES COMPILE_FLAGS "-qopt-report=4 -qoptreport-phase=vec,loop, -qopenmp-simd")
++set_source_files_properties(av1/common/convolve.c PROPERTIES COMPILE_FLAGS "-qopt-report=4 -qoptreport-phase=vec,loop -qopenmp-simd")
++set_source_files_properties(aom_dsp/aom_convolve.c PROPERTIES COMPILE_FLAGS "-qopt-report=4 -qoptreport-phase=vec,loop -qopenmp-simd")
+ 
+ add_library(aom_version ${AOM_VERSION_SOURCES})
+ add_dummy_source_file_to_target(aom_version c)
+diff --git a/aom_dsp/aom_convolve.c b/aom_dsp/aom_convolve.c
+index e83f3db..cdd6b5a 100644
+--- a/aom_dsp/aom_convolve.c
++++ b/aom_dsp/aom_convolve.c
+@@ -38,19 +38,41 @@ static void convolve_horiz(const uint8_t *src, ptrdiff_t src_stride,
+                            const InterpKernel *x_filters, int x0_q4,
+                            int x_step_q4, int w, int h) {
+   src -= SUBPEL_TAPS / 2 - 1;
+-  #pragma omp simd
+-  for (int y = 0; y < h; ++y) {
+-    int x_q4 = x0_q4;
+-  for (int x = 0; x < w; ++x) {
+-      const uint8_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
+-      const int16_t *const x_filter = x_filters[x_q4 & SUBPEL_MASK];
+-      const int sum = horz_scalar_product(src_x, x_filter);
+-      dst[x] = clip_pixel(ROUND_POWER_OF_TWO(sum, FILTER_BITS));
+-      x_q4 += x_step_q4;
+-    }
+-    src += src_stride;
+-    dst += dst_stride;
++  if(x_step_q4 == (1 << SUBPEL_BITS)) //==16
++  {
++    int masked_idx = x0_q4 & SUBPEL_MASK;
++    int x0_q4 = x0_q4 >> SUBPEL_BITS;
++    for (int y = 0; y < h; ++y) {
++      int x_q4 = x0_q4;
++    #pragma omp simd
++    for (int x = 0; x < w; ++x) {
++        const uint8_t *const src_x = &src[x_q4];
++        const int16_t *const x_filter = x_filters[masked_idx];
++        const int sum = horz_scalar_product(src_x, x_filter);
++        dst[x] = clip_pixel(ROUND_POWER_OF_TWO(sum, FILTER_BITS));
++        x_q4 += 1;
++      }
++      src += src_stride;
++      dst += dst_stride;
+   }
++  }
++  else
++  {
++    #pragma omp simd
++    for (int y = 0; y < h; ++y) {
++      int x_q4 = x0_q4;
++    for (int x = 0; x < w; ++x) {
++        const uint8_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
++        const int16_t *const x_filter = x_filters[x_q4 & SUBPEL_MASK];
++        const int sum = horz_scalar_product(src_x, x_filter);
++
++        x_q4 += x_step_q4; 
++      }
++      src += src_stride;
++      dst += dst_stride;
++
++  }
++}
+ }
+ 
+ static void convolve_vert(const uint8_t *src, ptrdiff_t src_stride,
+@@ -58,6 +80,24 @@ static void convolve_vert(const uint8_t *src, ptrdiff_t src_stride,
+                           const InterpKernel *y_filters, int y0_q4,
+                           int y_step_q4, int w, int h) {
+   src -= src_stride * (SUBPEL_TAPS / 2 - 1);
++  if(y_step_q4 == (1 << SUBPEL_BITS)) //==16
++  {
++   int masked_idx = y0_q4 & SUBPEL_MASK;
++   int y0_q4 = y0_q4 >> SUBPEL_BITS;
++   #pragma omp simd
++   for (int x = 0; x < w; ++x) {
++    int y_q4 = y0_q4;
++   for (int y = 0; y < h; ++y) {
++      const unsigned char *src_y = &src[(y_q4) * src_stride];
++      const int16_t *const y_filter = y_filters [masked_idx];
++      const int sum = vert_scalar_product(src_y, src_stride, y_filter);
++      dst[y * dst_stride] = clip_pixel(ROUND_POWER_OF_TWO(sum, FILTER_BITS));
++      y_q4 += 1;
++    }
++    ++src;
++    ++dst;
++  }
++ }else{
+   #pragma omp simd
+   for (int x = 0; x < w; ++x) {
+     int y_q4 = y0_q4;
+@@ -70,8 +110,10 @@ static void convolve_vert(const uint8_t *src, ptrdiff_t src_stride,
+     }
+     ++src;
+     ++dst;
++
+   }
+ }
++}
+ 
+ static const InterpKernel *get_filter_base(const int16_t *filter) {
+   // NOTE: This assumes that the filter table is 256-byte aligned.

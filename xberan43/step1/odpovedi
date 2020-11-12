@@ -1,10 +1,14 @@
 1) Jaké je maximální dosažitelné zrychlení celého běhu kodéru, jestli se soustředíme na optimalizaci nejzásadnějších konvolučních funkcí (v Bottom-upzobrazení by se mělojednat o 7 vrchních záznamů)? Výpočet lze v realizovat dle Amdahlova zákona.
-	Odpověď: cca 1.5x (v mém případě celkový čas=90.380 s, neparalelizovatelná část = 60.405 s, paralelizovatelná část 29.975 s )
+	Odpoved: cca 1.5x
+		Celkovy cas: 72.944 s
+		Seriovy cas: 48.984 s
+		Paralelizovatelny cas: 23.96 s
+		Pokud bychom uvazovali "nekonecnou" vektorizaci, lze zlepseni brat jako pomer celkoveho casu behu k casu behu seriove casti, tedy 72.944/48.984 =+- 1.489
 
 2) Jaké je dle vás realisticky dosažitelné zrychlení (nebude přihlíženo na kvalitu vašehoodhadu)?
-	odpověď: 1.1x
+	Odpoved: 1.3x
 
 3) Ze získaných optimalizačních reportů vypište nejméně 3 příčiny, které brání kompilátoru kód vektorizovat. Nemusíte se omezovat na konkrétní funkce.
-	1) Závislost vektorů
-	2) Vektorizace se zdá neefektivní
-	3) Byla provedena vektorizace vnitřní smyčky
+	1) Zavislost vektoru
+	2) Vektorizace se zda neefektivni
+	3) Byla provedena vektorizace vnitrni smycky

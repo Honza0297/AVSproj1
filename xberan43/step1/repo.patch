@@ -1,0 +1,14 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2ef0863..2ad2bee 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -174,6 +174,9 @@ include_directories(${AOM_ROOT} ${AOM_CONFIG_DIR} ${AOM_ROOT}/apps
+                     ${AOM_ROOT}/common ${AOM_ROOT}/examples ${AOM_ROOT}/stats)
+ 
+ # Targets
++set_source_files_properties(av1/common/convolve.c PROPERTIES COMPILE_FLAGS "-qopt-report=4 -qoptreport-phase=vec,loop")
++set_source_files_properties(aom_dsp/aom_convolve.c PROPERTIES COMPILE_FLAGS "-qopt-report=4 -qoptreport-phase=vec,loop")
++
+ add_library(aom_version ${AOM_VERSION_SOURCES})
+ add_dummy_source_file_to_target(aom_version c)
+ add_custom_command(OUTPUT "${AOM_CONFIG_DIR}/config/aom_version.h"

@@ -1,0 +1,9 @@
+1) Povedlo se vektorizovat vsechny vznikle cykly? Proc?
+	Odpoved: Nepovedlo, vektorizaci vertikalni konvoluce jsem neprovedl (nevymyslel jsem vhodnou transformaci).
+
+2) Otestuje dosazene zrychleni na videu rush hour. Dosahli jste stejnych vysledku jako u prvniho videa?
+	Na videu "park joy" bylo zrychleni zhruba 1.33x, u videa "rush hour" jsem nameril zrychleni  zhruba 1.1x.
+
+3) Jake jsou vyhody psani vektorizovatelneho a jinak paralelizovatelneho kodu a vyuzivani kompilatoru oproti psani v jazyce symbolickych instrukci nebo vyuzivani intrinsic funkci? 
+
+	Odpoved: Vyuzivani paralelizace  kompilatorem ma tu vyhodu, ze jde paralelizovat i jednou napsany kod a neni nutne vypisovat specialni paralelizovany kod. Snadne je take ziskani "seriove verze", kdy pouze staci prelozit kod bez flagu pro vyuzivani omp pragmat. Ta jsou potom ignorovana.  
